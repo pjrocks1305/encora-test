@@ -1,6 +1,6 @@
-var configVar = require("../config/config.json");
+const configVar = require("../config/config.json");
 
-var DBConfig = {
+const DBConfig = {
     client: 'mysql',
     connection: {
         host: configVar.host,
@@ -12,10 +12,10 @@ var DBConfig = {
     }
 };
 
-var knex = require('knex')(DBConfig);
+const  knex = require('knex')(DBConfig);
 knex.on( 'query', function( queryData ) {
     //console.log(queryData);
 });
-var bookshelf = require('bookshelf')(knex);
+const bookshelf = require('bookshelf')(knex);
 
 module.exports.bookshelf = bookshelf;

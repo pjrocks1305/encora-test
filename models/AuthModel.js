@@ -1,6 +1,6 @@
-var bcrypt = require("bcrypt");
-var Promise = require("bluebird");
-var Bookshelf = require("../config/db").bookshelf;
+const bcrypt = require("bcrypt");
+const Promise = require("bluebird");
+const Bookshelf = require("../config/db").bookshelf;
 
 /**
  * @swagger

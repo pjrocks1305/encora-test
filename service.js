@@ -25,16 +25,17 @@ const postSingleRow = (obj, collection, callback) => {
         .then(data => callback(null, data))
         .catch(err => callback(err, null));
 };
-const fetchAllObject = (queryObject, collection, callback) => {
-    collection
+const fetchAllObject = async(queryObject, collection) => {
+    try{
+        await collection
         .where(queryObject)
         .fetchAll()
         .then(function (data) {
-            callback(null, data)
+            return {success: true, data: data};
         })
-        .catch(function (err){
-            callback(err, null);
-        })
+    } catch(err){
+        return {success: false, error: err};
+    }
 };
 
 

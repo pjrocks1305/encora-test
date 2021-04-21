@@ -1,32 +1,39 @@
-var passport = require('passport');
-var express = require('express');
-var jwt = require('jwt-simple');
-var router = express.Router();
-var service = require('../service');
-var notesDetailsModel = require('../models/NotesDetails');
-var errCode = require('../error-code.json');
-var tokenRetrive = require('../helper/get-token');
-var configVar = require('../config/config.json');
+const passport = require('passport');
+const express = require('express');
+const jwt = require('jwt-simple');
+const router = express.Router();
+const service = require('../service');
+const notesDetailsModel = require('../models/NotesDetails');
+const errCode = require('../error-code.json');
+const tokenRetrive = require('../helper/get-token');
+const configVar = require('../config/config.json');
 
 
 require('../middlewares/passport')(passport);
 
 // get user notes
-router.get('/', passport.authenticate('jwt', {session: false}), function(req, res, next) {
-  service.fetchAllObject(req.query, notesDetailsModel.NotesDetail, function (err, data) {
-    if(err){
-      next({status: 500, message: errCode.ERROR_INTERNAL_SERVER_ERROR, error : err})
-    } else{
-      res.status(200).json({success: true, data : data})
-    }
-  });
+router.get('/',  async function(req, res, next) {
+  const data = await service.fetchAllObject(req.query, notesDetailsModel.NotesDetail);
+  if(data.success === false){
+    next({status: 500, message: errCode.ERROR_INTERNAL_SERVER_ERROR, error : data.err})
+  }else {
+    res.status(200).json({success: true, data : data.data})
+  }
+  
+//   function (err, data) {
+//     if(err){
+//      
+//     } else{
+//       res.status(200).json({success: true, data : data})
+//     }
+//   });
 });
 
 
 // get notes by user id
 router.get('/:user_id', passport.authenticate('jwt', {session: false}), function(req, res, next) {
-    var token = tokenRetrive.getToken(req.headers);
-    var decoded = jwt.decode(token, configVar.secretOrKey);
+    const token = tokenRetrive.getToken(req.headers);
+    const decoded = jwt.decode(token, configVar.secretOrKey);
     if(decoded.id == req.params.user_id){
         service.fetchAllObject({user_id: req.params.user_id}, notesDetailsModel.NotesDetail, function (err, data) {
             if(err){
@@ -44,9 +51,9 @@ router.get('/:user_id', passport.authenticate('jwt', {session: false}), function
 
 // post notes for user
 router.post('/', passport.authenticate('jwt', {session: false}), function(req, res, next) {
-    var token = tokenRetrive.getToken(req.headers);
-    var decoded = jwt.decode(token, configVar.secretOrKey);
-    var obj = {
+    const token = tokenRetrive.getToken(req.headers);
+    const decoded = jwt.decode(token, configVar.secretOrKey);
+    const obj = {
         user_id: decoded.id,
         description: req.body.description
     }

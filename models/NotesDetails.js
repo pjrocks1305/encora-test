@@ -1,4 +1,4 @@
-var Bookshelf = require('../config/db').bookshelf;
+const Bookshelf = require('../config/db').bookshelf;
 
 /**
  * @swagger
@@ -17,11 +17,11 @@ var Bookshelf = require('../config/db').bookshelf;
  *         type: string
  */
 
-var NotesDetail = Bookshelf.Model.extend({
+const NotesDetail = Bookshelf.Model.extend({
     tableName: 'notes'
 });
 
-var NotesDetails = Bookshelf.Collection.extend({
+const NotesDetails = Bookshelf.Collection.extend({
     model: NotesDetail
 });
 

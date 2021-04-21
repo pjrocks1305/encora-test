@@ -1,18 +1,18 @@
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
 
-var indexRouter = require('./routes/index');
-var notesRouter = require('./routes/notes');
-var authRouter = require('./routes/auth');
-var swaggerJSDoc = require("swagger-jsdoc");
-var swaggerUI = require("swagger-ui-express");
+const indexRouter = require('./routes/index');
+const notesRouter = require('./routes/notes');
+const authRouter = require('./routes/auth');
+const swaggerJSDoc = require("swagger-jsdoc");
+const swaggerUI = require("swagger-ui-express");
 
 
-var app = express();
+const app = express();
 
-var allowCrossDomain = function (req, res, next) {
+const allowCrossDomain = function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,PATCH');
     res.header("Access-Control-Allow-Headers", "Authorization, Origin, X-Requested-With, Content-Type, Accept");
@@ -24,7 +24,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-var swaggerOptions = {
+const swaggerOptions = {
     swaggerDefinition:{
         info: {
             title: "Encora test API",
@@ -40,7 +40,7 @@ var swaggerOptions = {
     apis: ["./models/*.js", "./routes/*.js"]
 }
 
-var swaggerDocs = swaggerJSDoc(swaggerOptions);
+const swaggerDocs = swaggerJSDoc(swaggerOptions);
 app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 
 app.use('/', indexRouter);

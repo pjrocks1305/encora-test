@@ -1,12 +1,12 @@
-var express = require('express');
-var router = express.Router();
-var service = require('../service');
-var authModel = require('../models/AuthModel');
-var jwt = require("jsonwebtoken");
-var async = require("async");
-var bcrypt = require("bcrypt");
-var errCode = require('../error-code.json');
-var configVar = require("../config/config.json");
+const express = require('express');
+const router = express.Router();
+const service = require('../service');
+const authModel = require('../models/AuthModel');
+const jwt = require("jsonwebtoken");
+const async = require("async");
+const bcrypt = require("bcrypt");
+const errCode = require('../error-code.json');
+const configVar = require("../config/config.json");
 
 
 /**

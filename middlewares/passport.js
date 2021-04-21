@@ -1,12 +1,12 @@
-var Service = require('../service');
-var JwtStrategy = require('passport-jwt').Strategy;
-var ExtractJwt = require('passport-jwt').ExtractJwt;
-var authModel = require('../models/AuthModel');
-var configVar = require('../config/config.json');
-var errCode = require('../error-code.json');
+const Service = require('../service');
+const JwtStrategy = require('passport-jwt').Strategy;
+const ExtractJwt = require('passport-jwt').ExtractJwt;
+const authModel = require('../models/AuthModel');
+const configVar = require('../config/config.json');
+const errCode = require('../error-code.json');
 
 module.exports = function(passport) {
-    var opts = {};
+    const opts = {};
     opts.secretOrKey = configVar.secretOrKey ;
     opts.jwtFromRequest = ExtractJwt.fromAuthHeaderWithScheme('JWT');
     passport.use(new JwtStrategy(opts, function(jwt_payload, next) {
