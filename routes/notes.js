@@ -14,6 +14,7 @@ require('../middlewares/passport')(passport);
 // get user notes
 router.get('/',  async function(req, res, next) {
   const data = await service.fetchAllObject(req.query, notesDetailsModel.NotesDetail);
+  console.log(data);
   if(data.success === false){
     next({status: 500, message: errCode.ERROR_INTERNAL_SERVER_ERROR, error : data.err})
   }else {
