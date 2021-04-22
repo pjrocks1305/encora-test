@@ -1,72 +1,93 @@
-const findByObject = (queryObject, collection, callback) => {
-    collection
+var Bookshelf = require('./config/db').bookshelf;
+
+const findByObject = async (queryObject, collection) => {
+    try {
+        const data = await collection
         .forge(queryObject)
         .fetch()
-        .then(data => callback(null, data))
-        .catch(err => callback(err, null));
+        return data ? data.toJSON() : null;
+    } catch(err){
+                throw err;
+
+    }
 };
 
-const postMultipleRow = (objArray, collection, callback) => {
-    collection
-        .forge(objArray)
-        .invokeThen('save')
-        .then(function (data) {
-            callback(null, data)
-        })
-        .catch(function (err){
-            callback(err, null);
-        })
-};
-
-const postSingleRow = (obj, collection, callback) => {
-    collection
+const postSingleRow = async(obj, collection) => {
+    console.log(obj);
+    try{
+        const data = await collection
         .forge(obj)
         .save()
-        .then(data => callback(null, data))
-        .catch(err => callback(err, null));
-};
-const fetchAllObject = async(queryObject, collection) => {
-    try{
-        await collection
-        .where(queryObject)
-        .fetchAll()
-        .then(function (data) {
-            return {success: true, data: data};
-        })
+        return obj;
     } catch(err){
-        return {success: false, error: err};
+        throw err;
+    }
+    
+        
+};
+const fetchAllObject = async (queryObject, collection) => {
+    try{
+        const data = await collection
+        .where(queryObject)
+        .fetchAll();
+        return data.toJSON();
+    } catch(err){
+        throw err;
     }
 };
 
 
-const updateByObjectId = (updateObject, collection, callback) => {
-    collection
+const updateByObjectId = async (updateObject, collection) => {
+    try {
+        const data = await collection
         .forge({ id: updateObject.id })
         .fetch({ require: true })
-        .then((data) => {
-            data.save(updateObject)
-                .then(() => callback(null, data))
-                .catch(err => callback(err, null));
-        })
-        .catch(err => callback(err, null));
+    await data.save(updateObject)
+    return data.toJSON();
+    } catch(err){
+        throw err;
+    }
 };
 
-const deleteByObjectId = (deleteId, collection, callback) => {
-    collection
+const deleteByObjectId = async (deleteId, collection) => {
+    try {
+        const data = await collection
         .forge({ id: deleteId })
         .fetch({ require: true })
-        .then((data) => {
-            data.destroy()
-                .then(() => callback(null, data))
-                .catch(err => callback(err, null));
-        })
-        .catch(err => callback(err, null));
+    await data.destroy();
+    return data.toJSON();
+    } catch(err){
+        throw err;
+    }
 };
+
+const findUserNotes = async(req) => {
+    try {
+        if(req.query.page && req.query.limit){
+            const offset = (req.query.page -1) * req.query.limit;
+            var data = await Bookshelf.knex
+            .select('*')
+            .from('notes')
+            .where('user_id', req.params.user_id)
+            .limit(req.query.limit)
+            .offset(offset);
+        } else {
+            var data = await Bookshelf.knex
+            .select('*')
+            .from('notes')
+            .where('user_id', req.params.user_id) 
+        }
+        
+        return data;
+    }catch(err){
+        throw err;
+    }
+}
 module.exports =  {
-    postMultipleRow : postMultipleRow,
     postSingleRow : postSingleRow,
     fetchAllObject: fetchAllObject,
     updateByObjectId: updateByObjectId,
     deleteByObjectId: deleteByObjectId,
-    findByObject: findByObject
+    findByObject: findByObject,
+    findUserNotes: findUserNotes
 };

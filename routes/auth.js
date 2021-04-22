@@ -1,12 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const service = require('../service');
-const authModel = require('../models/AuthModel');
-const jwt = require("jsonwebtoken");
-const async = require("async");
-const bcrypt = require("bcrypt");
 const errCode = require('../error-code.json');
-const configVar = require("../config/config.json");
+const authController = require("../controller/authController");
 
 
 /**
@@ -70,90 +65,39 @@ const configVar = require("../config/config.json");
  *               type: string
  *
  */
-router.post('/signup', (req, res, next) => {
+router.post('/signup', async (req, res, next) => {
     if(req.body.name && req.body.email && req.body.password){
-        const tasks = [
-            (callback) => {
-                service.findByObject({ email: req.body.email }, authModel.User, (err, user) => {
-                    if (err) {
-                        return callback({status: 500, message : errCode.ERROR_INTERNAL_SERVER_ERROR, error: "Internal server error"}, null);
-                    } else if (user) {
-                        return callback({status: 400, message: errCode.ERROR_BAD_REQUEST, error: "A user with email ID already exists"}, null);
-                    } else {
-                        return callback(null, null);
-                    }
-                });
-            },
-            (callback) => {
-                const obj = {
-                    name: req.body.name,
-                    email: req.body.email,
-                    password: req.body.password
-                };
-                service.postSingleRow(obj, authModel.User, (err, userData) => {
-                    if (err) {
-                        return callback({status: 500, message : errCode.ERROR_INTERNAL_SERVER_ERROR, error: "Internal server error"}, null);
-                    } else {
-                        const usr = userData.toJSON();
-                        delete usr.password;
-                        const token = jwt.sign(usr, configVar.secretOrKey);
-                        return callback(null, { token: `JWT ${token}` });
-                    }
-                });
-            },
-        ];
-        async.series(tasks, (err, results) => {
-            if (err) {
-                return next({status: err.status, message: err.message, error: err.error})
-            } else {
+        try{
+            const data = await authController.signup(req);
+            if(data.success === false){
+                return next(data);
+            } else{
                 res.status(201).json({
                     success: true,
                     message: 'User registered successfully',
-                    data: results[1],
+                    data: data.token
                 });
             }
-        });
+        } catch(err){
+            next({status: 500, message: errCode.ERROR_INTERNAL_SERVER_ERROR, error : err})
+        }
     } else {
         return next({status : 400, message: errCode.ERROR_BAD_REQUEST, error: "The error is caused due to some invalid input value"})
     }
 });
 
-router.post('/login', (req, res, next) => {
+router.post('/login', async (req, res, next) => {
     if(req.body.email && req.body.password){
-        const tasks = [
-            (callback) => {
-                service.findByObject({email: req.body.email}, authModel.User, (err, user) => {
-                    if (err) {
-                        return callback({status: 500, message : errCode.ERROR_INTERNAL_SERVER_ERROR, error: "Internal server error"}, null);
-                    } else if (!user) {
-                        return callback({status: 400, message: errCode.ERROR_BAD_REQUEST, error: "This email id does not exist in our system"}, null)
-                    } else {
-                        return callback(null, user);
-                    }
-                });
-            },
-            (user, callback) => {
-                bcrypt.compare(req.body.password, user.get('password'), (error, isMatch) => {
-                    if (isMatch && !error) {
-                        const token = jwt.sign(user.toJSON(), configVar.secretOrKey);
-                        return callback(null, { success: true, token: `JWT ${token}` });
-                    } else {
-                        return callback({status: 400, message: errCode.ERROR_BAD_REQUEST, error: "Your password is not correct"}, null);
-                    }
-                });
-            }
-        ];
-        async.waterfall(tasks, (err, results) => {
-            if (err) {
-                return next({status: err.status, message: err.message, error: err.error});
-            } else {
-                res.status(200).json({
-                    success: true,
-                    message: 'User Logged in successfully',
-                    data: results,
-                });
-            }
-        });
+        const data = await authController.login(req);
+        if(data.success === false){
+            return next(data);
+        } else{
+            res.status(200).json({
+                success: true,
+                message: 'User Logged in successfully',
+                data: data.token,
+            });
+        }
     } else {
         return next({status: 400, message: errCode.ERROR_BAD_REQUEST, error: "The error is caused due to some invalid input value"});
     }
